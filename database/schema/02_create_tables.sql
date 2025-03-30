@@ -1,0 +1,11 @@
+USE FoodtekDB;
+
+
+
+DROP TABLE IF EXISTS Users;
+CREATE TABLE Users
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    -- ...
+)
