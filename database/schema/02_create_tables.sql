@@ -18,3 +18,20 @@ CREATE TABLE Users
     UpdatedBy INT NULL,
     IsActive BIT DEFAULT 1,
 )
+
+DROP TABLE IF EXISTS Items;
+CREATE TABLE Items
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    ItemNameAR NVARCHAR(255) NOT NULL,
+    ItemNameEN VARCHAR(255) NOT NULL,
+    ItemDescriptionAR NVARCHAR(255) NOT NULL,
+    ItemDescriptionEN VARCHAR(255) NOT NULL,
+    Price DECIMAL(5,2) NOT NULL CHECK (Price > 0),
+    ImageUrl NVARCHAR(255) NULL,
+)
