@@ -8,13 +8,209 @@ USE FoodtekDB;
 -- UpdatedBy INT NULL,
 -- IsActive BIT DEFAULT 1,
 
+/*Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,*/
+
 DROP TABLE IF EXISTS Users;
 CREATE TABLE Users
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
     CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),   
+    UserNameHash NVARCHAR(50) NOT NULL UNIQUE CHECK (UserNameHash NOT LIKE '%[^a-zA-Z]%'),
+    PasswordHash NVARCHAR(255) NOT NULL CHECK (LEN(PasswordHash) >= 8 AND (PasswordHash NOT LIKE '%[^a-zA-Z0-9]%')
+    AND (PasswordHash LIKE '%[0-9]%') AND (PasswordHash LIKE '%[a-z]%') AND (PasswordHash LIKE '%[A-Z]%')),
+    Email NVARCHAR(100) NOT NULL UNIQUE CHECK (Email LIKE '%@gmail.com' 
+        OR Email LIKE '%@hotmail.com' 
+        OR Email LIKE '%@outlook.com' 
+        OR Email LIKE '%@zoho.com'),
+    FirstName NVARCHAR(50) NOT NULL CHECK (FirstName NOT LIKE '%[^a-zA-Z ]%'),
+    LastName NVARCHAR(50) NOT NULL CHECK (LastName NOT LIKE '%[^a-zA-Z ]%'),
+    IsLogging BIT DEFAULT 0,
     IsActive BIT DEFAULT 1,
+    Role NVARCHAR(20) NOT NULL CHECK (Role IN ('SuperAdmin','Admin', 'User','Client','Driver','Employee')),
+    
+)
+Drop TABLE IF EXISTS Persons;
+CREATE TABLE Persons
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    PhoneNumber NVARCHAR(20) NOT NULL UNIQUE CHECK (LEN(PhoneNumber) = 10 AND PhoneNumber Like '07[7,8,9]%' AND PhoneNumber NOT LIKE '%[^0-9]%'),
+    ProfileImage NVARCHAR(255) NULL,
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+
+)
+DROP TABLE IF EXISTS SuperAdmin;
+CREATE TABLE SuperAdmin
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS Admins;
+CREATE TABLE Admins
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+)
+
+DROP TABLE IF EXISTS Roles;
+CREATE TABLE Roles
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    RoleNameEN NVARCHAR(50) NOT NULL UNIQUE CHECK (RoleNameEN NOT LIKE '%[^a-zA-Z ]%'),
+    RoleNameAR NVARCHAR(50) NOT NULL UNIQUE CHECK (RoleNameAR NOT LIKE '%[^ء-ي ]%'),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    CreatedBy INT NULL,
+    UpdatedBy INT NULL,
+)
+DROP TABLE IF EXISTS Permissions;
+CREATE TABLE Permissions
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    NameEN NVARCHAR(50) NOT NULL UNIQUE CHECK (NameEN NOT LIKE '%[^a-zA-Z ]%'),
+    NameAR NVARCHAR(50) NOT NULL UNIQUE CHECK (NameAR NOT LIKE '%[^ء-ي ]%'),
+    DescriptionEN NVARCHAR(255) NULL,
+    DescriptionAR NVARCHAR(255) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    CreatedBy INT NULL,
+    UpdatedBy INT NULL,
+)
+
+DROP TABLE IF EXISTS RolePermissions;
+CREATE TABLE RolePermissions
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    RoleId INT NOT NULL,
+    PermissionId INT NOT NULL,
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE,
+    FOREIGN KEY (PermissionId) REFERENCES Permissions(Id) ON DELETE CASCADE,
+    UNIQUE (RoleId, PermissionId) 
+)
+Drop TABLE IF EXISTS Employees;
+CREATE TABLE Employees
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    RoleId INT NOT NULL,
+    FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS Drivers;
+CREATE TABLE Drivers
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS Clients;
+CREATE TABLE Clients
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Birthdate DATETIME NOT NULL CHECK (Birthdate <= DATEADD(YEAR, -16, GETDATE())),
+    STATUS NVARCHAR(20) NOT NULL CHECK (STATUS IN ('Active','Inactive','Forbidden','Blocked')),
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS Conversations;
+CREATE TABLE Conversations
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    DriverID INT NOT NULL,
+    CLientID INT NOT NULL,
+    FOREIGN KEY (DriverID) REFERENCES Drivers(Id) ON DELETE CASCADE,
+    FOREIGN KEY (CLientID) REFERENCES Clients(Id) ON DELETE CASCADE,
+    UNIQUE (DriverID, CLientID) 
+)
+DROP TABLE IF EXISTS Messages;
+CREATE TABLE Messages
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    SenderId INT NOT NULL,
+    ReceiverId INT NOT NULL,
+    ConversationId INT NOT NULL,
+    IsDeleted BIT DEFAULT 0,
+    MessageText Text NOT NULL,
+    FOREIGN KEY (SenderId) REFERENCES Users(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ReceiverId) REFERENCES Users(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ConversationId) REFERENCES Conversations(Id) ON DELETE CASCADE
+)
+Drop TABLE IF EXISTS Orders;
+CREATE TABLE Orders
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    OrderDate DATETIME NOT NULL,
+    OrderStatus NVARCHAR(20) NOT NULL CHECK (OrderStatus IN ('Order Placed','On the Way','Delivered')),
+    ClientId INT NOT NULL,
+    DriverId INT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+    FOREIGN KEY (DriverId) REFERENCES Drivers(Id) ON DELETE SET NULL
+)
+/*DROP TABLE IF EXISTS Shipments;
+CREATE TABLE Shipments
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    ShipmentDate DATETIME NOT NULL,
+    ShipmentStatus NVARCHAR(20) NOT NULL CHECK (ShipmentStatus IN ('Pending','InProgress','Delivered','Cancelled')),
+    OrderId INT NOT NULL,
+    FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE
+)*/
+DROP TABLE IF EXISTS OrderItems;
+CREATE TABLE OrderItems
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    Quantity INT NOT NULL CHECK (Quantity > 0),
+    Price DECIMAL(18, 2) NOT NULL CHECK (Price > 0),
+    Rate DECIMAL(3, 2) NULL CHECK (Rate >= 0 AND Rate <= 5),
+    Review NVARCHAR(255) NULL CHECK (Review NOT LIKE '%[^a-zA-Z0-9 ]%'),
+    IsDeleted BIT DEFAULT 0,
+    ItemId INT NOT NULL,
+    OrderId INT NOT NULL,
+    FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE,
+    FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS ItemOptions;
+CREATE TABLE ItemOptions
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    createdBy INT NULL,
+    ItemId INT NOT NULL,
+    OptionId INT NOT NULL,
+    FOREIGN KEY (OptionId) REFERENCES Options(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE
+)
+DROP TABLE IF EXISTS Bookmarks;
+CREATE TABLE Bookmarks
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    ClientId INT NOT NULL,
+    ItemId INT NOT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE,
+    UNIQUE (ClientId, ItemId) 
 )
