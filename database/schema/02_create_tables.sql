@@ -20,26 +20,26 @@ CREATE TABLE Users
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
     CreatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedAt DATETIME DEFAULT GETDATE(),   
+    UpdatedAt DATETIME DEFAULT GETDATE(),
     UserNameHash NVARCHAR(50) NOT NULL UNIQUE CHECK (UserNameHash NOT LIKE '%[^a-zA-Z]%'),
     PasswordHash NVARCHAR(255) NOT NULL CHECK (LEN(PasswordHash) >= 8 AND (PasswordHash NOT LIKE '%[^a-zA-Z0-9]%')
-    AND (PasswordHash LIKE '%[0-9]%') AND (PasswordHash LIKE '%[a-z]%') AND (PasswordHash LIKE '%[A-Z]%')),
-    Email NVARCHAR(100) NOT NULL UNIQUE CHECK (Email LIKE '%@gmail.com' 
-        OR Email LIKE '%@hotmail.com' 
-        OR Email LIKE '%@outlook.com' 
-        OR Email LIKE '%@zoho.com'),
+            AND (PasswordHash LIKE '%[0-9]%') AND (PasswordHash LIKE '%[a-z]%') AND (PasswordHash LIKE '%[A-Z]%')),
+    Email NVARCHAR(100) NOT NULL UNIQUE CHECK (Email LIKE '%@gmail.com'
+            OR Email LIKE '%@hotmail.com'
+            OR Email LIKE '%@outlook.com'
+            OR Email LIKE '%@zoho.com'),
     FirstName NVARCHAR(50) NOT NULL CHECK (FirstName NOT LIKE '%[^a-zA-Z ]%'),
     LastName NVARCHAR(50) NOT NULL CHECK (LastName NOT LIKE '%[^a-zA-Z ]%'),
     IsLogging BIT DEFAULT 0,
     IsActive BIT DEFAULT 1,
     Role NVARCHAR(20) NOT NULL CHECK (Role IN ('SuperAdmin','Admin', 'User','Client','Driver','Employee')),
-    
+
 )
-Drop TABLE IF EXISTS Persons;
+DROP TABLE IF EXISTS Persons;
 CREATE TABLE Persons
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
-    PhoneNumber NVARCHAR(20) NOT NULL UNIQUE CHECK (LEN(PhoneNumber) = 10 AND PhoneNumber Like '07[7,8,9]%' AND PhoneNumber NOT LIKE '%[^0-9]%'),
+    PhoneNumber NVARCHAR(20) NOT NULL UNIQUE CHECK (LEN(PhoneNumber) = 10 AND PhoneNumber LIKE '07[7,8,9]%' AND PhoneNumber NOT LIKE '%[^0-9]%'),
     ProfileImage NVARCHAR(255) NULL,
     UserId INT NOT NULL,
     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
@@ -78,8 +78,8 @@ CREATE TABLE Permissions
     Id INT PRIMARY KEY IDENTITY(1,1),
     NameEN NVARCHAR(50) NOT NULL UNIQUE CHECK (NameEN NOT LIKE '%[^a-zA-Z ]%'),
     NameAR NVARCHAR(50) NOT NULL UNIQUE CHECK (NameAR NOT LIKE '%[^ء-ي ]%'),
-    DescriptionEN NVARCHAR(255) NULL,
-    DescriptionAR NVARCHAR(255) NULL,
+    DescriptionEN NVARCHAR(255) NULL CHECK (DescriptionEN NOT LIKE '%[^a-zA-Z ]%'),
+    DescriptionAR NVARCHAR(255) NULL CHECK (DescriptionAR NOT LIKE '%[^ء-ي ]%'),
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
     IsActive BIT DEFAULT 1,
@@ -97,9 +97,9 @@ CREATE TABLE RolePermissions
     PermissionId INT NOT NULL,
     FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE,
     FOREIGN KEY (PermissionId) REFERENCES Permissions(Id) ON DELETE CASCADE,
-    UNIQUE (RoleId, PermissionId) 
+    UNIQUE (RoleId, PermissionId)
 )
-Drop TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Employees;
 CREATE TABLE Employees
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -133,7 +133,7 @@ CREATE TABLE Conversations
     CLientID INT NOT NULL,
     FOREIGN KEY (DriverID) REFERENCES Drivers(Id) ON DELETE CASCADE,
     FOREIGN KEY (CLientID) REFERENCES Clients(Id) ON DELETE CASCADE,
-    UNIQUE (DriverID, CLientID) 
+    UNIQUE (DriverID, CLientID)
 )
 DROP TABLE IF EXISTS Messages;
 CREATE TABLE Messages
@@ -144,12 +144,31 @@ CREATE TABLE Messages
     ReceiverId INT NOT NULL,
     ConversationId INT NOT NULL,
     IsDeleted BIT DEFAULT 0,
-    MessageText Text NOT NULL,
+    MessageText TEXT NOT NULL,
     FOREIGN KEY (SenderId) REFERENCES Users(Id) ON DELETE CASCADE,
     FOREIGN KEY (ReceiverId) REFERENCES Users(Id) ON DELETE CASCADE,
     FOREIGN KEY (ConversationId) REFERENCES Conversations(Id) ON DELETE CASCADE
 )
-Drop TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Addresses;
+CREATE TABLE Addresses
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    AddressName NVARCHAR(255) NOT NULL,
+    Hint NVARCHAR(255) NULL,
+    Region NVARCHAR(255) NOT NULL,
+    Province NVARCHAR(255) NOT NULL,
+    Latitude DECIMAL(9,6) NOT NULL,
+    Longitude DECIMAL(9,6) NOT NULL,
+    CLientID INT NOT NULL,
+    FOREIGN KEY (CLientID) REFERENCES Clients(Id) ON DELETE CASCADE,
+)
+
+DROP TABLE IF EXISTS Orders;
 CREATE TABLE Orders
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -159,8 +178,10 @@ CREATE TABLE Orders
     OrderStatus NVARCHAR(20) NOT NULL CHECK (OrderStatus IN ('Order Placed','On the Way','Delivered')),
     ClientId INT NOT NULL,
     DriverId INT NULL,
+    AddressId INT NOT NULL,
     FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
-    FOREIGN KEY (DriverId) REFERENCES Drivers(Id) ON DELETE SET NULL
+    FOREIGN KEY (DriverId) REFERENCES Drivers(Id) ON DELETE SET NULL,
+    FOREIGN KEY (AddressId) REFERENCES Addresses(Id) ON DELETE CASCADE,
 )
 /*DROP TABLE IF EXISTS Shipments;
 CREATE TABLE Shipments
@@ -189,6 +210,124 @@ CREATE TABLE OrderItems
     FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE,
     FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE
 )
+
+
+DROP TABLE IF EXISTS Categories;
+CREATE TABLE Categories
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    NameAR NVARCHAR(255) NOT NULL CHECK (NameAR NOT LIKE '%[^ء-ي ]%'),
+    NameEN NVARCHAR(255) NOT NULL CHECK (NameEN NOT LIKE '%[^a-zA-Z ]%'),
+    ImageUrl NVARCHAR(255) NULL CHECK (ImageUrl LIKE '%.jpg' OR ImageUrl LIKE '%.png' OR ImageUrl LIKE '%.jpeg' OR ImageUrl Like '%.webp'),
+)
+DROP TABLE IF EXISTS Offers;
+CREATE TABLE Offers
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE() CHECK (CreatedAt>= DATETIME),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    TitleEN NVARCHAR(255) NOT NULL CHECK (TitleEN NOT LIKE '%[^a-zA-Z %$?]%'),
+    TitleAR NVARCHAR(255) NOT NULL CHECK (TitleAR NOT LIKE '%[^ء-ي %$?]%'),
+    DescriptionEN NVARCHAR(255) NOT NULL ,
+    DescriptionAR NVARCHAR(255) NOT NULL,
+    OfferStatus NVARCHAR(255) NOT NULL CHECK (OfferStatus IN ('Active','New','Expired','Cancelled')),
+    ImageUrl NVARCHAR(255) NULL CHECK (ImageUrl LIKE '%.jpg' OR ImageUrl LIKE '%.png' OR ImageUrl LIKE '%.jpeg' OR ImageUrl Like '%.webp'),
+    LimitPersons INT NULL CHECK (LimitPersons > 0),
+    LimitAmount Decimal(6,2) NULL CHECK (LimitAmount > 0),
+    UserPersons INT DEFAULT 0,
+    Code NVARCHAR(255) NULL CHECK (Code NOT LIKE '%[^a-zA-Z0-9]%'),
+    DiscountPercentage INT NULL CHECK(DiscountPercentage >= 0 AND DiscountPercentage <= 50),
+    EndDate DATETIME NULL CHECK (EndDate > CreatedAt),
+)
+DROP TABLE IF EXISTS ItemBadges;
+CREATE TABLE ItemBadges
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    BadgeName NVARCHAR(255) NOT NULL CHECK (BadgeName NOT LIKE '%[^a-zA-Z ]%'),
+    BadgeDescription NVARCHAR(255) NOT NULL,
+)
+
+DROP TABLE IF EXISTS Items;
+CREATE TABLE Items
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    ItemNameAR NVARCHAR(255) NOT NULL CHECK(ItemNameAR NOT LIKE '%[^ء-ي ]%'),
+    ItemNameEN NVARCHAR(255) NOT NULL CHECK(ItemNameEN NOT LIKE '%[^a-zA-Z ]%'),
+    ItemDescriptionAR NVARCHAR(255) NOT NULL CHECK(ItemDescriptionAR NOT LIKE '%[^ء-ي ]%'),
+    ItemDescriptionEN NVARCHAR(255) NOT NULL CHECK(ItemDescriptionEN NOT LIKE '%[^a-zA-Z ]%'),
+    Price DECIMAL(5,2) NOT NULL CHECK (Price > 0),
+    ImageUrl NVARCHAR(255) NULL CHECK (ImageUrl LIKE '%.jpg' OR ImageUrl LIKE '%.png' OR ImageUrl LIKE '%.jpeg' OR ImageUrl Like '%.webp'),
+    CategoryId INT NOT NULL,
+    OfferId INT NULL,
+    ItemBadgeId INT NULL,
+    FOREIGN KEY (OfferId) REFERENCES Offers(Id) ON DELETE SET NULL,
+    FOREIGN KEY (CategoryId) REFERENCES Categories(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ItemBadgeId) REFERENCES ItemBadges(Id) ON DELETE SET NULL,
+)
+
+DROP TABLE IF EXISTS Bookmarks;
+CREATE TABLE Bookmarks
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    ClientId INT NOT NULL,
+    ItemId INT NOT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE,
+    UNIQUE (ClientId, ItemId)
+)
+
+DROP TABLE IF EXISTS OptionCategories;
+CREATE TABLE OptionCategories
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    NameAR NVARCHAR(255) NOT NULL CHECK (NameAR NOT LIKE '%[^ء-ي ]%'),
+    NameEN NVARCHAR(255) NOT NULL CHECK (NameEN NOT LIKE '%[^a-zA-Z ]%'),
+    ImageURL NVARCHAR(255) NULL CHECK (ImageURL LIKE '%.jpg' OR ImageURL LIKE '%.png' OR ImageURL LIKE '%.jpeg' OR ImageURL Like '%.webp'),
+);
+
+
+DROP TABLE IF EXISTS Options;
+CREATE TABLE Options
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CreatedBy INT NULL,
+    UpdatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT NULL,
+    IsActive BIT DEFAULT 1,
+    NameAR NVARCHAR(255) NOT NULL CHECK (NameAR NOT LIKE '%[^ء-ي ]%'),
+    NameEN NVARCHAR(255) NOT NULL CHECK (NameEN NOT LIKE '%[^a-zA-Z ]%'),
+    IsRequired BIT DEFAULT 0,
+    CategoryId INT NOT NULL,
+    FOREIGN KEY (CategoryId) REFERENCES OptionCategories(Id) ON DELETE CASCADE,
+    UNIQUE (NameAR, NameEN, CategoryId)
+)
+
 DROP TABLE IF EXISTS ItemOptions;
 CREATE TABLE ItemOptions
 (
@@ -202,130 +341,9 @@ CREATE TABLE ItemOptions
     FOREIGN KEY (OptionId) REFERENCES Options(Id) ON DELETE CASCADE,
     FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE
 )
-DROP TABLE IF EXISTS Bookmarks;
-CREATE TABLE Bookmarks
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    IsActive BIT DEFAULT 1,
-    ClientId INT NOT NULL,
-    ItemId INT NOT NULL,
-    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
-    FOREIGN KEY (ItemId) REFERENCES Items(Id) ON DELETE CASCADE,
-    UNIQUE (ClientId, ItemId) 
-)
-
-DROP TABLE IF EXISTS Items;
-CREATE TABLE Items
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    ItemNameAR NVARCHAR(255) NOT NULL,
-    ItemNameEN NVARCHAR(255) NOT NULL,
-    ItemDescriptionAR NVARCHAR(255) NOT NULL,
-    ItemDescriptionEN NVARCHAR(255) NOT NULL,
-    Price DECIMAL(5,2) NOT NULL CHECK (Price > 0),
-    ImageUrl NVARCHAR(255) NULL,
-)
-
-DROP TABLE IF EXISTS ItemBadges;
-CREATE TABLE ItemBadges
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    BadgeName NVARCHAR(255) NOT NULL,
-    BadgeDescription NVARCHAR(255) NOT NULL,
-)
-
-DROP TABLE IF EXISTS Offers;
-CREATE TABLE Offers
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    TitleEN NVARCHAR(255) NOT NULL,
-    TitleAR NVARCHAR(255) NOT NULL,
-    DescriptionEN NVARCHAR(255) NOT NULL,
-    DescriptionAR NVARCHAR(255) NOT NULL,
-    OfferStatus NVARCHAR(255) NOT NULL,
-    ImageUrl NVARCHAR(255) NULL,
-    LimitPersons INT NULL,
-    LimitAmount INT NULL,
-    UserPersons INT DEFAULT 0,
-    Code NVARCHAR(255) NULL,
-    DiscountPercentage INT NULL,
-    EndDate DATETIME NULL,
-)
 
 
-DROP TABLE IF EXISTS Categories;
-CREATE TABLE Categories
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    NameAR NVARCHAR(255) NOT NULL,
-    NameEN NVARCHAR(255) NOT NULL,
-    ImageUrl NVARCHAR(255) NULL,
-)
 
-DROP TABLE IF EXISTS Options;
-CREATE TABLE Options
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    NameAR NVARCHAR(255) NOT NULL,
-    NameEN NVARCHAR(255) NOT NULL,
-    IsRequired BIT DEFAULT 0,
-)
-
-DROP TABLE IF EXISTS OptionCategories;
-CREATE TABLE OptionCategories
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    NameAR NVARCHAR(255) NOT NULL,
-    NameEN NVARCHAR(255) NOT NULL,
-);
-
-DROP TABLE IF EXISTS Addresses;
-CREATE TABLE Addresses
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    CreatedBy INT NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedBy INT NULL,
-    IsActive BIT DEFAULT 1,
-    AddressName NVARCHAR(255) NOT NULL,
-    Hint NVARCHAR(255) NULL,
-    Region NVARCHAR(255) NOT NULL,
-    Province NVARCHAR(255) NOT NULL,
-    Latitude DECIMAL(9,6) NOT NULL,
-    Longitude DECIMAL(9,6) NOT NULL,
-)
 
 DROP TABLE IF EXISTS SuggestionTickets;
 CREATE TABLE SuggestionTickets
@@ -340,6 +358,8 @@ CREATE TABLE SuggestionTickets
     Title NVARCHAR(255) NOT NULL,
     TicketDescription NVARCHAR(255) NOT NULL,
     TicketStatus NVARCHAR(255) NOT NULL,
+    ClientId INT NOT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
 )
 
 DROP TABLE IF EXISTS ProblemTickets;
@@ -372,6 +392,8 @@ CREATE TABLE PaymentMethods
     CardHolderName NVARCHAR(255) NOT NULL,
     ExpiryDate NVARCHAR(255) NOT NULL,
     CVC NVARCHAR(255) NOT NULL,
+    ClientId INT NOT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
 )
 
 DROP TABLE IF EXISTS Tokens;
@@ -386,6 +408,8 @@ CREATE TABLE Tokens
     JWTToken NVARCHAR(255) NOT NULL,
     ExpiryDate DATETIME NOT NULL,
     IsExpired BIT DEFAULT 0,
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
 )
 
 DROP TABLE IF EXISTS OTPs;
@@ -397,12 +421,14 @@ CREATE TABLE OTPs
     UpdatedAt DATETIME DEFAULT GETDATE(),
     UpdatedBy INT NULL,
     IsActive BIT DEFAULT 1,
-    OTPCode NVARCHAR(255) NOT NULL,
+    OTPCode NVARCHAR(255) NOT NULL Check (OTPCode NOT LIKE '%[^0-9]%' AND LEN(OTPCode) = 5),
     ExpiryDate DATETIME NOT NULL,
     IsExpired BIT DEFAULT 0,
     Attempt INT DEFAULT 0,
     IsUsed BIT DEFAULT 0,
     IsVerified BIT DEFAULT 0,
+    UserId INT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
 )
 
 DROP TABLE IF EXISTS Notifications;
@@ -432,4 +458,6 @@ CREATE TABLE Authentications
     IsActive BIT DEFAULT 1,
     ProviderName NVARCHAR(255) NOT NULL CHECK (ProviderName IN ('Google', 'Facebook', 'Apple')),
     ProviderLoginId NVARCHAR(255) NOT NULL,
+    ClientId INT NOT NULL,
+    FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
 )
