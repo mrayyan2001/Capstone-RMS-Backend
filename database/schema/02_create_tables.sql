@@ -1,3 +1,18 @@
+-- Check if the database exists before altering it
+IF EXISTS (SELECT name
+FROM sys.databases
+WHERE name = 'FoodtekDB')
+BEGIN
+    -- Force disconnect all users from the database
+    ALTER DATABASE FoodtekDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+    -- Now drop the database
+    DROP DATABASE FoodtekDB;
+END
+
+-- Recreate the database
+CREATE DATABASE FoodtekDB;
+
 USE FoodtekDB;
 
 -- Shared Attributes for all tables
@@ -21,18 +36,28 @@ CREATE TABLE Users
     Id INT PRIMARY KEY IDENTITY(1,1),
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    UserNameHash NVARCHAR(64) NOT NULL UNIQUE CHECK (UserNameHash NOT LIKE '%[^a-zA-Z]%'),
-    PasswordHash NVARCHAR(64) NOT NULL /* CHECK (LEN(PasswordHash) >= 8 AND (PasswordHash NOT LIKE '%[^a-zA-Z0-9]%')
+    UserNameHash NVARCHAR(128) NOT NULL UNIQUE /*CHECK (UserNameHash NOT LIKE '%[^a-zA-Z]%')*/,
+    PasswordHash NVARCHAR
+(128) NOT NULL /* CHECK (LEN(PasswordHash) >= 8 AND (PasswordHash NOT LIKE '%[^a-zA-Z0-9]%')
             AND (PasswordHash LIKE '%[0-9]%') AND (PasswordHash LIKE '%[a-z]%') AND (PasswordHash LIKE '%[A-Z]%'))*/,
-    Email NVARCHAR(100) NOT NULL UNIQUE CHECK (Email LIKE '%@gmail.com'
+    Email NVARCHAR
+(100) NOT NULL UNIQUE CHECK
+(Email LIKE '%@gmail.com'
             OR Email LIKE '%@hotmail.com'
             OR Email LIKE '%@outlook.com'
             OR Email LIKE '%@zoho.com'),
-    FirstName NVARCHAR(50) NOT NULL CHECK (FirstName NOT LIKE '%[^a-zA-Z ]%'),
-    LastName NVARCHAR(50) NOT NULL CHECK (LastName NOT LIKE '%[^a-zA-Z ]%'),
+    FirstName NVARCHAR
+(50) NOT NULL CHECK
+(FirstName NOT LIKE '%[^a-zA-Z ]%'),
+    LastName NVARCHAR
+(50) NOT NULL CHECK
+(LastName NOT LIKE '%[^a-zA-Z ]%'),
     IsLogging BIT DEFAULT 0,
     IsActive BIT DEFAULT 1,
-    Role NVARCHAR(20) NOT NULL CHECK (Role IN ('SuperAdmin','Admin', 'User','Client','Driver','Employee')),
+    Role NVARCHAR
+(20) NOT NULL CHECK
+(Role IN
+('SuperAdmin','Admin', 'User','Client','Driver','Employee')),
 
 )
 DROP TABLE IF EXISTS Persons;
@@ -45,20 +70,21 @@ CREATE TABLE Persons
     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
 
 )
-DROP TABLE IF EXISTS SuperAdmin;
-CREATE TABLE SuperAdmin
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    UserId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
-)
-DROP TABLE IF EXISTS Admins;
-CREATE TABLE Admins
-(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    UserId INT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
-)
+
+-- DROP TABLE IF EXISTS SuperAdmin;
+-- CREATE TABLE SuperAdmin
+-- (
+--     Id INT PRIMARY KEY IDENTITY(1,1),
+--     UserId INT NOT NULL,
+--     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+-- )
+-- DROP TABLE IF EXISTS Admins;
+-- CREATE TABLE Admins
+-- (
+--     Id INT PRIMARY KEY IDENTITY(1,1),
+--     UserId INT NOT NULL,
+--     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+-- )
 
 DROP TABLE IF EXISTS Roles;
 CREATE TABLE Roles
