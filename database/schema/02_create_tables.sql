@@ -11,7 +11,8 @@ BEGIN
 END
 
 -- Recreate the database
-CREATE DATABASE FoodtekDB;
+CREATE DATABASE FoodtekDB
+COLLATE Arabic_CI_AS;
 
 USE FoodtekDB;
 
@@ -96,7 +97,7 @@ CREATE TABLE Roles
     UpdatedAt DATETIME DEFAULT GETDATE(),
     IsActive BIT DEFAULT 1,
     CreatedBy INT NULL,
-    UpdatedBy INT NULL,
+    UpdatedBy INT NULL
 )
 DROP TABLE IF EXISTS Permissions;
 CREATE TABLE Permissions
