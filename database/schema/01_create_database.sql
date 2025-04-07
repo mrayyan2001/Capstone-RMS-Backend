@@ -11,4 +11,5 @@ BEGIN
 END
 
 -- Recreate the database
-CREATE DATABASE FoodtekDB;
+CREATE DATABASE FoodtekDB
+COLLATE Arabic_CI_AS;
