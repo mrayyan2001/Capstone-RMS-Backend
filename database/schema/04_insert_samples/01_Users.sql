@@ -2,9 +2,11 @@ USE FoodtekDB;
 
 -- Step 1: Delete all rows
 DELETE FROM Users;
+GO
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Users', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Users';
+GO
 
 -- Step 3: Insert sample data
 INSERT INTO Users

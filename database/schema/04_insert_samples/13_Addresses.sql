@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM Addresses;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Addresses', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Addresses'
 
 -- Step 3: Insert sample data
 INSERT INTO Addresses

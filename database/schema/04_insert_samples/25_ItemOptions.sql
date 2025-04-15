@@ -1,14 +1,10 @@
 USE FoodtekDB;
 
-IF EXISTS (SELECT 1
-FROM ItemOptions)
-BEGIN
-    -- Step 1: Delete all rows`
-    DELETE FROM ItemOptions;
+-- Step 1: Delete all rows`
+DELETE FROM ItemOptions;
 
-    -- Step 2: Reset IDENTITY to start from 1 again
-    DBCC CHECKIDENT ('ItemOptions', RESEED, 0);
-END
+-- Step 2: Reset IDENTITY to start from 1 again
+EXEC ResetIdentitySeedIfNotOne @TableName = 'ItemOptions';
 
 -- Step 3: Insert sample data
 

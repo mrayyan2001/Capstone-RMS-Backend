@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM OrderItems;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('OrderItems', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'OrderItems';
 
 -- Step 3: Insert sample data
 INSERT INTO OrderItems

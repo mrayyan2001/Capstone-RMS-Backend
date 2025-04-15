@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM Options;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Options', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Options';
 
 -- Step 3: Insert sample data
 -- Options.sql (15 entries)

@@ -1,14 +1,12 @@
 USE FoodtekDB;
 
-IF EXISTS (SELECT 1
-FROM Conversations)
-BEGIN
-    -- Step 1: Delete all rows
-    DELETE FROM Conversations;
 
-    -- Step 2: Reset IDENTITY to start from 1 again
-    DBCC CHECKIDENT ('Conversations', RESEED, 0);
-END
+-- Step 1: Delete all rows
+DELETE FROM Conversations;
+
+-- Step 2: Reset IDENTITY to start from 1 again
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Conversations';
+
 
 -- Step 3: Insert sample data
 -- Conversations.sql (5 entries)

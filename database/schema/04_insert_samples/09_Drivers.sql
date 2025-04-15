@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM Drivers;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Drivers', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Drivers';
 
 -- Step 3: Insert sample data
 INSERT INTO Drivers

@@ -1,14 +1,10 @@
 USE FoodtekDB;
 
-IF EXISTS (SELECT 1
-FROM OTPs)
-BEGIN
-    -- Step 1: Delete all rows
-    DELETE FROM OTPs;
+-- Step 1: Delete all rows
+DELETE FROM OTPs;
 
-    -- Step 2: Reset IDENTITY to start from 1 again
-    DBCC CHECKIDENT ('OTPs', RESEED, 0);
-END
+-- Step 2: Reset IDENTITY to start from 1 again
+EXEC ResetIdentitySeedIfNotOne @TableName = 'OTPs';
 
 -- Step 3: Insert sample data
 -- OTPs.sql (15 entries)

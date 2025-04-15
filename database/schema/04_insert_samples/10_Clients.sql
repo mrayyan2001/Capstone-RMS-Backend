@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM Clients;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Clients', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Clients';
 
 -- Step 3: Insert sample data
 INSERT INTO Clients

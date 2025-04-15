@@ -5,7 +5,7 @@ USE FoodtekDB;
 DELETE FROM Bookmarks;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Bookmarks', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Bookmarks';
 
 -- Step 3: Insert sample data
 -- Bookmarks.sql (Additional 10 entries)

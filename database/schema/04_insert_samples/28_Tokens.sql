@@ -1,14 +1,10 @@
 USE FoodtekDB;
 
-IF EXISTS (SELECT 1
-FROM Tokens)
-BEGIN
-    -- Step 1: Delete all rows
-    DELETE FROM Tokens;
+-- Step 1: Delete all rows
+DELETE FROM Tokens;
 
-    -- Step 2: Reset IDENTITY to start from 1 again
-    DBCC CHECKIDENT ('Tokens', RESEED, 0);
-END
+-- Step 2: Reset IDENTITY to start from 1 again
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Tokens';
 
 -- Step 3: Insert sample data
 -- Tokens.sql (10 entries)

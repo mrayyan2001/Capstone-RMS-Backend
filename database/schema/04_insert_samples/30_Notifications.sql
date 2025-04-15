@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM Notifications;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Notifications', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Notifications';
 
 -- Step 3: Insert sample data
 -- Notifications.sql (10 entries)

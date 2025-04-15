@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM ItemBadges;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('ItemBadges', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'ItemBadges';
 
 -- Step 3: Insert sample data
 -- ItemBadges.sql (5 entries)

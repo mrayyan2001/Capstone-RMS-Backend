@@ -6,7 +6,7 @@ USE FoodtekDB;
 DELETE FROM Categories;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Categories', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Categories';
 
 -- Step 3: Insert sample data
 INSERT INTO Categories

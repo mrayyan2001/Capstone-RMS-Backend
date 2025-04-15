@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM PaymentMethods;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('PaymentMethods', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'PaymentMethods';
 
 -- Step 3: Insert sample data
 INSERT INTO PaymentMethods

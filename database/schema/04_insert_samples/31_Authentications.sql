@@ -5,7 +5,7 @@ USE FoodtekDB;
 DELETE FROM Authentications;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('Authentications', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'Authentications';
 
 -- Step 3: Insert sample data
 -- Authentications.sql (5 entries)

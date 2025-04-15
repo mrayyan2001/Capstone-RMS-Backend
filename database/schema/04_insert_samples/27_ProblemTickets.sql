@@ -1,14 +1,10 @@
 USE FoodtekDB;
 
-IF EXISTS (SELECT 1
-FROM ProblemTickets)
-BEGIN
-    -- Step 1: Delete all rows
-    DELETE FROM ProblemTickets;
+-- Step 1: Delete all rows
+DELETE FROM ProblemTickets;
 
-    -- Step 2: Reset IDENTITY to start from 1 again
-    DBCC CHECKIDENT ('ProblemTickets', RESEED, 0);
-END
+-- Step 2: Reset IDENTITY to start from 1 again
+EXEC ResetIdentitySeedIfNotOne @TableName = 'ProblemTickets';
 
 -- Step 3: Insert sample data
 -- ProblemTickets.sql (5 entries)

@@ -4,7 +4,7 @@ USE FoodtekDB;
 DELETE FROM RolePermissions;
 
 -- Step 2: Reset IDENTITY to start from 1 again
-DBCC CHECKIDENT ('RolePermissions', RESEED, 0);
+EXEC ResetIdentitySeedIfNotOne @TableName = 'RolePermissions';
 
 -- Step 3: Insert sample data
 INSERT INTO RolePermissions (RoleId, PermissionId)
