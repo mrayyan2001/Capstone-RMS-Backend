@@ -13,7 +13,7 @@
 - [x] Addresses
 - [x] PaymentMethods
 - [x] Orders
-- [ ] Shipments
+- [x] ~~Shipments~~
 - [x] Offers
 - [x] Categories
 - [x] ItemBadges
