@@ -19,19 +19,35 @@ namespace api.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(_onboardingService.GetAllPages());
+            try
+            {
+                return Ok(_onboardingService.GetAllPages());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
+
         }
 
         [HttpGet("{pageNumber}")]
         public IActionResult GetPageByNumber([FromRoute] int pageNumber)
         {
-            var existingPage = _onboardingService.GetPageByNumber(pageNumber);
-            if (existingPage is null)
+            try
             {
-                return NotFound();
-            }
+                var existingPage = _onboardingService.GetPageByNumber(pageNumber);
+                if (existingPage is null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(existingPage);
+                return Ok(existingPage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+            }
         }
+
     }
 }
