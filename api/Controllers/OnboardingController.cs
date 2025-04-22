@@ -1,19 +1,21 @@
-using System;
-using System.Collections.Generic;
-using api.Interfaces;
+﻿using api.Interfaces;
+using api.Models;
+using api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OnboardingController : ControllerBase
-    {
-        private readonly IOnboardingService _onboardingService;
 
-        public OnboardingController(IOnboardingService onboardingService)
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class OnbordingControllers : ControllerBase
+    {
+        private readonly IOnboardingService _service;
+        public OnbordingControllers(IOnboardingService service)
         {
-            _onboardingService = onboardingService;
+            _service = service;
         }
 
         [HttpGet]
@@ -21,7 +23,7 @@ namespace api.Controllers
         {
             try
             {
-                return Ok(_onboardingService.GetAllPages());
+                return Ok(_service.GetAllPages());
             }
             catch (Exception ex)
             {
@@ -31,23 +33,26 @@ namespace api.Controllers
         }
 
         [HttpGet("{pageNumber}")]
-        public IActionResult GetPageByNumber([FromRoute] int pageNumber)
+        public async Task<IActionResult> GetPageByNumber([FromRoute] int pageNumber)
         {
             try
             {
-                var existingPage = _onboardingService.GetPageByNumber(pageNumber);
-                if (existingPage is null)
+                var response = _service.GetPageByNumber(pageNumber);
+                if (response == null)
                 {
                     return NotFound();
                 }
+                return Ok(response);
 
-                return Ok(existingPage);
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while processing your request.", details = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
+
+
 
     }
 }
