@@ -37,3 +37,4 @@ BEGIN
     -- Return the generated OTP
     SELECT @otp AS OTP;
 END;
+
