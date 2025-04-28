@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace api.DTOs.Client
 {
-    public class RequestOtpDto
+    public class ResponseOtpDTO
     {
         public string Email { get; set; } = string.Empty;
+
     }
 }

@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 
 namespace api.DTOs.Client
 {
-    public class VerifyOtpDto
+    public class VerifyOtpDTO: IClientDTO
     {
-        public string Email { get; set; } = string.Empty;
+        //public string Email { get; set; } = string.Empty;
+        public int UserId { get; set; }
         public string Otp { get; set; } = string.Empty;
     }
 }

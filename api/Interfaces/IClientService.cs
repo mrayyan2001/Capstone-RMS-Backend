@@ -10,10 +10,12 @@ namespace api.Interfaces
 {
     public interface IClientService
     {
-        public Task<Client> Signup(ClientSignUpDTO dto);
+        //public Task<Client> Signup(ClientSignUpDTO dto);
         public Task<Client?> Login(ClientLoginDTO dto);
-        public Task<string?> RequestOtp(RequestOtpDto dto);
-        public Task<bool> VerifyOtp(VerifyOtpDto dto);
+        public Task<string?> RequestOtp(string email);
+        public Task<bool> VerifyOtp(VerifyOtpDTO dto);
         public Task<bool> ResetPassword(ResetPasswordDTO dto);
+        public Task<bool> CheckExistsClient(string email);
+        public Task<ClientInfoDTO> GetUserByEmail(string email);
     }
 }
