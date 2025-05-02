@@ -49,11 +49,11 @@ namespace api.Services
                             return targetUser;
                         }
                     }
-                        return null;
-                    }
-
+                    return null;
                 }
+
             }
+        }
 
         public async Task<Client?> Login(ClientLoginDTO dto)
         {
@@ -87,7 +87,7 @@ namespace api.Services
         }
         public async Task<bool> CheckExistsClient(string email)
         {
-            if (await GetUserByEmail(email)==null)
+            if (await GetUserByEmail(email) == null)
             {
                 return false;
             }
@@ -121,9 +121,9 @@ namespace api.Services
 
                 return null;
             }
-            }
-        
-        
+        }
+
+
         private async Task IncrementAttempt(int otpId)
         {
             using (SqlConnection conn = new SqlConnection(_connString))
@@ -150,9 +150,9 @@ namespace api.Services
                 }
             }
         }
-        
-        
-        
+
+
+
 
         public async Task<bool> VerifyOtp(VerifyOtpDTO dto)
         {
@@ -163,7 +163,7 @@ namespace api.Services
             //    INNER JOIN Users u ON o.UserId = u.Id
             //    WHERE u.Email = @Email
             //    ORDER BY o.CreatedAt DESC";
-            const string selectQuery= @"SELECT TOP 1 o.Id, o.OTPCode, o.IsActive, o.ExpiryDate, o.Attempt, o.CreatedAt
+            const string selectQuery = @"SELECT TOP 1 o.Id, o.OTPCode, o.IsActive, o.ExpiryDate, o.Attempt, o.CreatedAt
                                         FROM OTPs o 
                                         WHERE o.UserId = @UserId
                                         ORDER BY o.CreatedAt DESC";
@@ -173,7 +173,7 @@ namespace api.Services
             DateTime expiryDate;
             int attempts;
 
-            using (SqlConnection  conn =new SqlConnection(_connString))
+            using (SqlConnection conn = new SqlConnection(_connString))
             {
                 using (SqlCommand cmd = new SqlCommand(selectQuery, conn))
                 {
@@ -216,7 +216,7 @@ namespace api.Services
         {
             string query = "update users set PasswordHash=@pass where id=@id";
 
-            using (SqlConnection conn= new SqlConnection(_connString))
+            using (SqlConnection conn = new SqlConnection(_connString))
             {
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
@@ -230,21 +230,53 @@ namespace api.Services
             return true;
         }
 
-        public async Task<Client> Signup(ClientSignUpDTO dto)
+        public async Task<Client?> Signup(ClientSignUpDTO dto)
         {
+
             using (SqlConnection conn = new SqlConnection(_connString))
             {
-                using (SqlCommand cmd = conn.CreateCommand())
+
+                using (SqlCommand command = new SqlCommand("ClientSignUp", conn))
                 {
-                    string query = "insert into users(UserNameHash,PasswordHash,Email,FirstName,LastName,[Role])\r\nvalues\r\n(@UserNameHash,@PasswordHash,@Email,@FirstName,@LastName,@Role)";
-                    string query1 = "insert into clients (FullName,Email,BirthDate,Phone,[Password])\r\nvalues\r\n(@BirthDate,@ClientStatus,@UserId)";
-                    cmd.CommandText =query;
-                   
-                   
+                    string firstName = dto.FullName.Split(' ')[0];
+                    string lastName = dto.FullName.Split(' ').Length > 1 ? dto.FullName.Split(' ')[1] : string.Empty;
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@FirstName", firstName);
+                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@Email", dto.Email);
+                    command.Parameters.AddWithValue("@BirthDate", dto.BirthDate);
+                    command.Parameters.AddWithValue("@PhoneNumber", dto.Phone);
+                    command.Parameters.AddWithValue("@PasswordHash", PasswordHelper.ComputeSHA512Hash(dto.Password));
+
+                    await conn.OpenAsync();
+
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.Read())
+                        {
+                            int newUserId;
+                            if (int.TryParse(reader["NewUserID"].ToString(), out newUserId))
+                            {
+                                if (newUserId > 0)
+                                {
+                                    return new Client()
+                                    {
+                                        Id = newUserId,
+                                        FirstName = firstName,
+                                        LastName = lastName,
+                                        Email = dto.Email,
+                                        BirthDate = dto.BirthDate,
+                                        Phone = dto.Phone,
+                                    };
+                                }
+                            }
+                        }
+                    }
                 }
+
+                return null;
             }
 
-        
         }
 
 
