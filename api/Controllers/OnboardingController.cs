@@ -11,15 +11,16 @@ namespace api.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class OnbordingControllers : ControllerBase
+    public class OnboardingControllers : ControllerBase
     {
         private readonly IOnboardingService _service;
-        public OnbordingControllers(IOnboardingService service)
+        public OnboardingControllers(IOnboardingService service)
         {
             _service = service;
         }
 
         [HttpGet]
+        [Authorize(Roles = "User")]
         public IActionResult GetAll()
         {
             try

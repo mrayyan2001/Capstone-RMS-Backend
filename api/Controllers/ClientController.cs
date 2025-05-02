@@ -16,10 +16,12 @@ namespace api.Controllers
     public class ClientController : ControllerBase
     {
         private readonly IClientService _clientService;
+        private readonly ITokenService _tokenService;
 
-        public ClientController(IClientService clientService)
+        public ClientController(IClientService clientService, ITokenService tokenService)
         {
             _clientService = clientService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("login")]
@@ -36,12 +38,12 @@ namespace api.Controllers
                 var client = await _clientService.Login(dto);
                 if (client is null)
                     return Unauthorized(new { message = "Incorrect Email or Password" });
-                return Ok(new { message = $"Welcome {client.FirstName}", client });
+                return Ok(new { message = $"Welcome {client.FirstName}", client, token = await _tokenService.CreateTokenAsync(client) });
             }
 
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ex.Message);
             }
 
         }
