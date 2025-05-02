@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using api.Helpers;
 using api.Interfaces;
 using api.Models;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace api.Services
@@ -15,13 +16,12 @@ namespace api.Services
     public class TokenService : ITokenService
     {
         private readonly SymmetricSecurityKey symmetricKey;
-        private readonly IConfiguration _config;
+        private readonly JwtSettings _jwtSetting;
 
-        public TokenService(IConfiguration config)
+        public TokenService(IOptions<JwtSettings> jwtOptions)
         {
-            _config = config;
-
-            symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"] ?? throw new ArgumentNullException("Key is null")));
+            _jwtSetting = jwtOptions.Value;
+            symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key ?? throw new ArgumentNullException("Key is null")));
         }
 
         public async Task<string> CreateTokenAsync(Client client)
@@ -45,10 +45,10 @@ namespace api.Services
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(Convert.ToDouble(_config["JWT:ExpireTime"])),
+                Expires = DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSetting.ExpireTime)),
                 SigningCredentials = creds,
-                Issuer = _config["JWT:Issuer"],
-                Audience = _config["JWT:Audience"]
+                Issuer = _jwtSetting.Issuer,
+                Audience = _jwtSetting.Audience
             };
 
             // Convert tokenDescriptor to token
