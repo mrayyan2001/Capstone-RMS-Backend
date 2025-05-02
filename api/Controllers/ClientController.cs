@@ -16,16 +16,18 @@ namespace api.Controllers
     public class ClientController : ControllerBase
     {
         private readonly IClientService _clientService;
+        private readonly ITokenService _tokenService;
 
-        public ClientController(IClientService clientService)
+        public ClientController(IClientService clientService, ITokenService tokenService)
         {
             _clientService = clientService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(ClientLoginDTO dto)
         {
-            
+
             try
             {
                 if (!ClientValidator.IsEnterAllInput(dto))
@@ -36,18 +38,18 @@ namespace api.Controllers
                 var client = await _clientService.Login(dto);
                 if (client is null)
                     return Unauthorized(new { message = "Incorrect Email or Password" });
-                return Ok(new { message = $"Welcome {client.FirstName}", client });
+                return Ok(new { message = $"Welcome {client.FirstName}", client, token = await _tokenService.CreateTokenAsync(client) });
             }
-            
-            catch(Exception ex)
+
+            catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error" );
+                return StatusCode(500, ex.Message);
             }
 
         }
 
         [HttpPost("request-otp")]
-        public async Task<IActionResult> RequestOtp([FromBody]string email)
+        public async Task<IActionResult> RequestOtp([FromBody] string email)
         {
             try
             {
@@ -56,23 +58,20 @@ namespace api.Controllers
                 if (!await _clientService.CheckExistsClient(email))
                     return Unauthorized("Email not found");
                 // TODO - we should sent the otp in the email
-                return Ok(new  {message = "OTP sent to your email", OTP = await _clientService.RequestOtp(email)});
+                return Ok(new { message = "OTP sent to your email", OTP = await _clientService.RequestOtp(email) });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-
-
-
 
         [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp(VerifyOtpDTO dto)
         {
             try
             {
-                if(!ClientValidator.IsEnterAllInput(dto))
+                if (!ClientValidator.IsEnterAllInput(dto))
                 {
                     return BadRequest("OTP is required");
                 }
@@ -101,17 +100,36 @@ namespace api.Controllers
                 {
                     throw new Exception("New password and Confirm password doesn't match");
                 }
-                
-                    await _clientService.ResetPassword(dto);
-                    return Ok();
+
+                await _clientService.ResetPassword(dto);
+                return Ok();
                 throw new Exception("Try Again");
             }
-      
 
-        catch (Exception ex)
+
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("signup")]
+        public async Task<IActionResult> SingUp(ClientSignUpDTO dto)
+        {
+            try
+            {
+                var user = await _clientService.Signup(dto);
+                if (user is null)
+                {
+                    return BadRequest("Try Again");
+                }
+                return Ok(new { message = "Account Created Successfully", user });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }
