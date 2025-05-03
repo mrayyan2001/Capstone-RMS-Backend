@@ -18,25 +18,25 @@ namespace api.Services
         private readonly SymmetricSecurityKey symmetricKey;
         private readonly JwtSettings _jwtSetting;
 
-        public TokenService(IOptions<JwtSettings> jwtOptions)
+        public TokenService(IOptions<JwtSettings> jwtOptions, FoodtekDbContext context)
         {
             _jwtSetting = jwtOptions.Value;
             symmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Key ?? throw new ArgumentNullException("Key is null")));
         }
 
-        public async Task<string> CreateTokenAsync(Client client)
+        public async Task<string> CreateTokenAsync(int id, string email, string role)
         {
             // Basic Claims
             List<Claim> claims =
             [
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique identifier for the token
-                new Claim(JwtRegisteredClaimNames.Email, client.Email ?? string.Empty), // Email
-                new Claim("uid", client.Id.ToString()) // Custom claim (user ID)
+                new Claim(JwtRegisteredClaimNames.Email, email ?? string.Empty), // Email
+                new Claim("uid",id.ToString()) // Custom claim (user ID)
             ];
 
             // Role claims
             // Get User Role for Database
-            claims.Add(new Claim(ClaimTypes.Role, "User"));
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
             // Signing credentials
             var creds = new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha512Signature);

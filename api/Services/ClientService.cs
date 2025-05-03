@@ -19,7 +19,7 @@ namespace api.Services
         private readonly string _connString;
         public ClientService(IConfiguration config)
         {
-            _connString = config.GetConnectionString("DefaultConnection");
+            _connString = config.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("No Connection String");
         }
 
         public async Task<ClientInfoDTO?> GetUserByEmail(string email)
@@ -55,7 +55,7 @@ namespace api.Services
             }
         }
 
-        public async Task<Client?> Login(ClientLoginDTO dto)
+        public async Task<ClientDTO?> Login(ClientLoginDTO dto)
         {
             string selectCommandText =
                             @"SELECT * 
@@ -73,7 +73,7 @@ namespace api.Services
                     DataTable table = new DataTable();
                     adapter.Fill(table);
                     if (table.Rows.Count == 1)
-                        return new Client()
+                        return new ClientDTO()
                         {
                             Id = Convert.ToInt32(table.Rows[0]["Id"].ToString()),
                             FirstName = table.Rows[0]["FirstName"]?.ToString() ?? string.Empty,
@@ -229,7 +229,7 @@ namespace api.Services
             return true;
         }
 
-        public async Task<Client?> Signup(ClientSignUpDTO dto)
+        public async Task<ClientDTO?> Signup(ClientSignUpDTO dto)
         {
 
             using (SqlConnection conn = new SqlConnection(_connString))
@@ -259,7 +259,7 @@ namespace api.Services
                             {
                                 if (newUserId > 0)
                                 {
-                                    return new Client()
+                                    return new ClientDTO()
                                     {
                                         Id = newUserId,
                                         FirstName = dto.FirstName,
