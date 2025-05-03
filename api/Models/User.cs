@@ -27,6 +27,8 @@ public partial class User
 
     public string Role { get; set; } = null!;
 
+    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+
     public virtual ICollection<Client> Clients { get; set; } = new List<Client>();
 
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
