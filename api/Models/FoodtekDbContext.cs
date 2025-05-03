@@ -21,6 +21,10 @@ public partial class FoodtekDbContext : DbContext
 
     public virtual DbSet<Bookmark> Bookmarks { get; set; }
 
+    public virtual DbSet<Cart> Carts { get; set; }
+
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Client> Clients { get; set; }
@@ -140,6 +144,35 @@ public partial class FoodtekDbContext : DbContext
             entity.HasOne(d => d.Item).WithMany(p => p.Bookmarks)
                 .HasForeignKey(d => d.ItemId)
                 .HasConstraintName("FK__Bookmarks__ItemI__4B7734FF");
+        });
+
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Cart__3214EC07575F1353");
+
+            entity.ToTable("Cart");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Cart__UserId__67DE6983");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CartItem__3214EC07826038F9");
+
+            entity.ToTable("CartItem");
+
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.CartId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CartItem__CartId__6ABAD62E");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ItemId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CartItem__ItemId__6BAEFA67");
         });
 
         modelBuilder.Entity<Category>(entity =>
