@@ -1,4 +1,5 @@
 USE FoodtekDB;
+--
 -- T-SQL (SQL Server)
 GO
 -- Drop the stored procedure if it exists
@@ -11,6 +12,7 @@ CREATE PROCEDURE ClientSignUp
     @LastName NVARCHAR(50),
     @Email NVARCHAR(100),
     @PasswordHash NVARCHAR(100),
+    @UserNameHash NVARCHAR(100),
     @PhoneNumber NVARCHAR(15),
     @BirthDate DATE
 )
@@ -23,9 +25,9 @@ BEGIN
 
         -- Insert the new user into the Users table
         INSERT INTO Users
-        (FirstName, LastName, Email, PasswordHash, [Role])
+        (FirstName, LastName, Email, PasswordHash,UserNameHash, [Role])
     VALUES
-        (@FirstName, @LastName, @Email, @PasswordHash, 'Client');
+        (@FirstName, @LastName, @Email, @PasswordHash,@UserNameHash, 'Client');
 
         DECLARE @UserID INT;
         SET @UserID = SCOPE_IDENTITY();
@@ -58,5 +60,16 @@ BEGIN
 END;
 GO
 
+EXEC ClientSignUp 
+    @FirstName = 'heba',
+    @LastName = 'heba',
+    @Email = 'heba1232001@gmail.com',
+    @PasswordHash = 'hashedpassword123',
+    @PhoneNumber = '0784567890',
+    @BirthDate = '1990-01-01';
+
 SELECT *
 FROM users;
+
+insert into users(UserNameHash,EMail,FirstName,Role,PasswordHash) values
+('hebaheba','heba200195@gmail.com','heba','User','heba123')
