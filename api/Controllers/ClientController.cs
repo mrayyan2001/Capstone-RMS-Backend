@@ -38,7 +38,7 @@ namespace api.Controllers
                 var client = await _clientService.Login(dto);
                 if (client is null)
                     return Unauthorized(new { message = "Incorrect Email or Password" });
-                return Ok(new { message = $"Welcome {client.FirstName}", client, token = await _tokenService.CreateTokenAsync(client) });
+                return Ok(new { message = $"Welcome {client.FirstName}", client, token = await _tokenService.CreateTokenAsync(client.Id, client.Email, "Client") });
             }
 
             catch (Exception ex)

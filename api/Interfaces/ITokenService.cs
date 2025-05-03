@@ -8,6 +8,6 @@ namespace api.Interfaces
 {
     public interface ITokenService
     {
-        public Task<string> CreateTokenAsync(Client client);
+        public Task<string> CreateTokenAsync(int id, string email, string role);
     }
 }

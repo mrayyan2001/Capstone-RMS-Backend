@@ -1,18 +1,33 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace api.Models
+namespace api.Models;
+
+public partial class Client
 {
-    public class Client
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public DateTime BirthDate { get; set; }
-        public string UserNameHash { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-    }
+    public int Id { get; set; }
+
+    public DateTime Birthdate { get; set; }
+
+    public string ClientStatus { get; set; } = null!;
+
+    public int UserId { get; set; }
+
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+
+    public virtual ICollection<Authentication> Authentications { get; set; } = new List<Authentication>();
+
+    public virtual ICollection<Bookmark> Bookmarks { get; set; } = new List<Bookmark>();
+
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
+
+    public virtual ICollection<ProblemTicket> ProblemTickets { get; set; } = new List<ProblemTicket>();
+
+    public virtual ICollection<SuggestionTicket> SuggestionTickets { get; set; } = new List<SuggestionTicket>();
+
+    public virtual User User { get; set; } = null!;
 }

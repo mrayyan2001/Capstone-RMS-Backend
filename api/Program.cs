@@ -1,8 +1,10 @@
 using System.Text;
 using api.Helpers;
 using api.Interfaces;
+using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,10 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
+
+builder.Services.AddDbContext<FoodtekDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddAuthentication(options =>
 {
