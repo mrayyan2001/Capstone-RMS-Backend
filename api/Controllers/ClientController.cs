@@ -121,7 +121,7 @@ namespace api.Controllers
                 var user = await _clientService.Signup(dto);
                 if (user is null)
                 {
-                    return BadRequest("Try Again");
+                    return BadRequest("Failed to creating the account, please try again.");
                 }
                 return Ok(new { message = "Account Created Successfully", user });
             }
