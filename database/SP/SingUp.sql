@@ -11,8 +11,8 @@ CREATE PROCEDURE ClientSignUp
     @FirstName NVARCHAR(50),
     @LastName NVARCHAR(50),
     @Email NVARCHAR(100),
-    @PasswordHash NVARCHAR(100),
-    @UserNameHash NVARCHAR(100),
+    @PasswordHash NVARCHAR(128),
+    @UserNameHash NVARCHAR(128),
     @PhoneNumber NVARCHAR(15),
     @BirthDate DATE
 )

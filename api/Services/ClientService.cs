@@ -72,7 +72,6 @@ namespace api.Services
                         );
                     DataTable table = new DataTable();
                     adapter.Fill(table);
-
                     if (table.Rows.Count == 1)
                         return new Client()
                         {
@@ -244,7 +243,7 @@ namespace api.Services
                     command.Parameters.AddWithValue("@FirstName", dto.FirstName);
                     command.Parameters.AddWithValue("@LastName", dto.LastName);
                     command.Parameters.AddWithValue("@Email", dto.Email);
-                    command.Parameters.AddWithValue("@UserNameHash", dto.Username);
+                    command.Parameters.AddWithValue("@UserNameHash", PasswordHelper.ComputeSHA512Hash(dto.Username));
                     command.Parameters.AddWithValue("@BirthDate", dto.BirthDate);
                     command.Parameters.AddWithValue("@PhoneNumber", dto.Phone);
                     command.Parameters.AddWithValue("@PasswordHash", PasswordHelper.ComputeSHA512Hash(dto.Password));
