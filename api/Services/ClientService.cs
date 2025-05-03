@@ -238,12 +238,13 @@ namespace api.Services
 
                 using (SqlCommand command = new SqlCommand("ClientSignUp", conn))
                 {
-                    string firstName = dto.FullName.Split(' ')[0];
-                    string lastName = dto.FullName.Split(' ').Length > 1 ? dto.FullName.Split(' ')[1] : string.Empty;
+                    //string firstName = dto.FullName.Split(' ')[0];
+                    //string lastName = dto.FullName.Split(' ').Length > 1 ? dto.FullName.Split(' ')[1] : string.Empty;
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@FirstName", firstName);
-                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@FirstName", dto.FirstName);
+                    command.Parameters.AddWithValue("@LastName", dto.LastName);
                     command.Parameters.AddWithValue("@Email", dto.Email);
+                    command.Parameters.AddWithValue("@UserNameHash", dto.Username);
                     command.Parameters.AddWithValue("@BirthDate", dto.BirthDate);
                     command.Parameters.AddWithValue("@PhoneNumber", dto.Phone);
                     command.Parameters.AddWithValue("@PasswordHash", PasswordHelper.ComputeSHA512Hash(dto.Password));
@@ -262,11 +263,11 @@ namespace api.Services
                                     return new Client()
                                     {
                                         Id = newUserId,
-                                        FirstName = firstName,
-                                        LastName = lastName,
+                                        FirstName = dto.FirstName,
+                                        LastName = dto.LastName,
                                         Email = dto.Email,
                                         BirthDate = dto.BirthDate,
-                                        Phone = dto.Phone,
+                                        Phone = dto.Phone
                                     };
                                 }
                             }
