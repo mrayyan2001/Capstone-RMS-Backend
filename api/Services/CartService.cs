@@ -20,11 +20,24 @@ namespace api.Services
 
         public async Task<CartItem?> AddAsync(AddCartDTO dto)
         {
-            if (!_context.Users.Any(u => u.Id == dto.UserId) || !_context.Items.Any(i => i.Id == dto.ItemId) || dto.Quantity <= 0)
-                return null;
+            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            if (user is null)
+                throw new ArgumentException("UserId is invalid.");
+
+            if (!_context.Items.Any(i => i.Id == dto.ItemId))
+                throw new ArgumentException("ItemId is invalid.");
 
 
-            var cartItem = new CartItem()
+            // TODO - check if item is already in the cart if it is then add the quantity to this item
+            var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == dto.ItemId);
+            if (cartItem is not null)
+            {
+                cartItem.Quantity += dto.Quantity;
+                await _context.SaveChangesAsync();
+                return cartItem;
+            }
+
+            cartItem = new CartItem()
             {
                 UserId = dto.UserId,
                 ItemId = dto.ItemId,
@@ -34,7 +47,6 @@ namespace api.Services
             await _context.SaveChangesAsync();
             return cartItem;
         }
-
         public async Task<List<CartItemDTO>> GetAllByUserIdAsync(int userId)
         {
             if (!_context.Users.Any(u => u.Id == userId))
@@ -53,6 +65,37 @@ namespace api.Services
                     ItemDescriptionEn = ci.Item.ItemDescriptionEn,
                     Quantity = ci.Quantity
                 }).ToListAsync();
+        }
+        public async Task DeleteAsync(int userId, int itemId)
+        {
+            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == userId);
+            if (user is null)
+                throw new ArgumentException("UserId is invalid");
+
+            var item = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
+            if (item is null)
+                throw new ArgumentException("ItemId is invalid");
+
+            _context.CartItems.Remove(item);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(UpdateCartQuantityDTO dto)
+        {
+            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            if (user is null)
+                throw new ArgumentException("UserId is invalid.");
+
+            if (!_context.Items.Any(i => i.Id == dto.ItemId))
+                throw new ArgumentException("ItemId is invalid.");
+
+            var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == dto.ItemId);
+            if (cartItem is null)
+            {
+                return;
+            }
+            cartItem.Quantity = dto.NewQuantity;
+            await _context.SaveChangesAsync();
         }
     }
 }
