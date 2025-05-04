@@ -49,5 +49,33 @@ namespace api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [HttpDelete("{userId}/{itemId}")]
+        public async Task<IActionResult> RemoveItem(int userId, int itemId)
+        {
+            try
+            {
+                await _carService.DeleteAsync(userId, itemId);
+                return Ok("Item removed from cart");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("update-quantity")]
+        public async Task<IActionResult> UpdateQuantity(UpdateCartQuantityDTO dto)
+        {
+            try
+            {
+                await _carService.UpdateAsync(dto);
+                return Ok("Item updated.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }
