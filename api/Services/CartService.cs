@@ -80,21 +80,21 @@ namespace api.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(UpdateCartQuantityDTO dto)
+        public async Task UpdateAsync(int userId, int itemId, int newQuantity)
         {
-            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == userId);
             if (user is null)
                 throw new ArgumentException("UserId is invalid.");
 
-            if (!_context.Items.Any(i => i.Id == dto.ItemId))
+            if (!_context.Items.Any(i => i.Id == itemId))
                 throw new ArgumentException("ItemId is invalid.");
 
-            var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == dto.ItemId);
+            var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
             if (cartItem is null)
             {
                 return;
             }
-            cartItem.Quantity = dto.NewQuantity;
+            cartItem.Quantity = newQuantity;
             await _context.SaveChangesAsync();
         }
     }
