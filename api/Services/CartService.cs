@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.DTOs.Cart;
 using api.Interfaces;
 using api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Services
 {
@@ -32,6 +33,26 @@ namespace api.Services
             await _context.CartItems.AddAsync(cartItem);
             await _context.SaveChangesAsync();
             return cartItem;
+        }
+
+        public async Task<List<CartItemDTO>> GetAllByUserIdAsync(int userId)
+        {
+            if (!_context.Users.Any(u => u.Id == userId))
+            {
+                throw new Exception("UserId is invalid");
+            }
+
+            return await _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .Select(ci => new CartItemDTO()
+                {
+                    ItemId = ci.ItemId,
+                    ItemNameAr = ci.Item.ItemNameAr,
+                    ItemNameEn = ci.Item.ItemNameEn,
+                    ItemDescriptionAr = ci.Item.ItemDescriptionAr,
+                    ItemDescriptionEn = ci.Item.ItemDescriptionEn,
+                    Quantity = ci.Quantity
+                }).ToListAsync();
         }
     }
 }

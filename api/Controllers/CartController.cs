@@ -22,12 +22,32 @@ namespace api.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddToCart([FromBody] AddCartDTO dto)
         {
-            var addResult = await _carService.AddAsync(dto);
-            if (addResult is null)
+            try
             {
-                return BadRequest("UserId or ItemId is invalid.");
+                var addResult = await _carService.AddAsync(dto);
+                if (addResult is null)
+                {
+                    return BadRequest("UserId or ItemId is invalid.");
+                }
+                return Ok("Item added to cart");
             }
-            return Ok("Item added to cart");
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("get-all/{userId}")]
+        public async Task<IActionResult> GetAllByUserId(int userId)
+        {
+            try
+            {
+                return Ok(await _carService.GetAllByUserIdAsync(userId));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }
