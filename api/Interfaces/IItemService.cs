@@ -12,5 +12,7 @@ namespace api.Interfaces
         public Task<DetailsItemDTO?> GetByIdAsync(int id);
         public Task<List<TopRatedItemDTO>> GetTop10RatedAsync();
         public Task<List<TopRecommendedItemDTO>> GetTop10RecommendedAsync();
+        public Task<List<GetItemByCategoryIdDTO>> GetItemByCategoryId(int id);
+
     }
 }

@@ -59,5 +59,18 @@ namespace api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        [HttpGet("GetAllByCategoryId/{id}")]
+        public async Task<IActionResult> GetByCategoryId([FromRoute] int id)
+        {
+            try
+            {
+
+                return Ok(await _itemService.GetItemByCategoryId(id));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }
