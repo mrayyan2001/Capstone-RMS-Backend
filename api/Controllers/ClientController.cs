@@ -17,11 +17,13 @@ namespace api.Controllers
     {
         private readonly IClientService _clientService;
         private readonly ITokenService _tokenService;
+        private readonly IEmailService _emailService;
 
-        public ClientController(IClientService clientService, ITokenService tokenService)
+        public ClientController(IClientService clientService, ITokenService tokenService, IEmailService emailService)
         {
             _clientService = clientService;
             _tokenService = tokenService;
+            _emailService = emailService;
         }
 
         [HttpPost("login")]
@@ -58,7 +60,16 @@ namespace api.Controllers
                 if (!await _clientService.CheckExistsClient(email))
                     return Unauthorized("Email not found");
                 // TODO - we should sent the otp in the email
-                return Ok(new { message = "OTP sent to your email", OTP = await _clientService.RequestOtp(email) });
+                await _emailService.SendEmailAsync(
+                    email: email,
+                    subject: "Your Password Reset OTP",
+                    body: @$"
+                    We received a request to reset your password. Please use the OTP (One-Time Password) below to proceed with resetting your password:
+
+                    OTP: {await _clientService.RequestOtp(email)}
+                    "
+                );
+                return Ok(new { message = "OTP sent to your email" });
             }
             catch (Exception ex)
             {

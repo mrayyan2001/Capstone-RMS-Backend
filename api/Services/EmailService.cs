@@ -32,12 +32,12 @@ namespace api.Services
             using var client = new SmtpClient(host, port)
             {
                 EnableSsl = true, // EnableSsl = true: enables SSL encryption.
-                Credentials = new NetworkCredential(from, appPassword)
+                Credentials = new NetworkCredential(from, appPassword),
             };
 
             await client.SendMailAsync(
                 new MailMessage(
-                    from: from,
+                    from: from ?? throw new ArgumentNullException("Email is null in configuration"),
                     to: to,
                     subject: subject,
                     body: body
