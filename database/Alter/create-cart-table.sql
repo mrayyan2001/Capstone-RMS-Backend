@@ -1,0 +1,23 @@
+USE FoodtekDB;
+
+DROP TABLE IF EXISTS CartItem;
+CREATE TABLE CartItem
+(
+    Id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    UserId INT NOT NULL,
+    ItemId INT NOT NULL,
+    Quantity INT NOT NULL,
+    FOREIGN KEY (ItemId) REFERENCES Items(Id),
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+);
+
+DROP TABLE IF EXISTS CartItem;
+-- CREATE TABLE CartItem
+-- (
+--     Id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+--     CartId INT NOT NULL,
+--     ItemId INT NOT NULL,
+--     Quantity INT NOT NULL,
+--     FOREIGN KEY (CartId) REFERENCES Cart(Id),
+--     FOREIGN KEY (ItemId) REFERENCES Items(Id)
+-- );

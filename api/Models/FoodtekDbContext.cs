@@ -21,6 +21,8 @@ public partial class FoodtekDbContext : DbContext
 
     public virtual DbSet<Bookmark> Bookmarks { get; set; }
 
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Client> Clients { get; set; }
@@ -140,6 +142,23 @@ public partial class FoodtekDbContext : DbContext
             entity.HasOne(d => d.Item).WithMany(p => p.Bookmarks)
                 .HasForeignKey(d => d.ItemId)
                 .HasConstraintName("FK__Bookmarks__ItemI__4B7734FF");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CartItem__3214EC07789764FC");
+
+            entity.ToTable("CartItem");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ItemId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CartItem__ItemId__7EC1CEDB");
+
+            entity.HasOne(d => d.User).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CartItem__UserId__7FB5F314");
         });
 
         modelBuilder.Entity<Category>(entity =>
