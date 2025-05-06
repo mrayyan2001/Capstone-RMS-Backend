@@ -17,6 +17,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddDbContext<FoodtekDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
