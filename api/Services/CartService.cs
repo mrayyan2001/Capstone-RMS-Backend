@@ -18,9 +18,9 @@ namespace api.Services
             _context = context;
         }
 
-        public async Task<CartItem?> AddAsync(AddCartDTO dto)
+        public async Task<CartItem?> AddAsync(int userId, AddCartDTO dto)
         {
-            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == userId);
             if (user is null)
                 throw new ArgumentException("UserId is invalid.");
 
@@ -39,7 +39,7 @@ namespace api.Services
 
             cartItem = new CartItem()
             {
-                UserId = dto.UserId,
+                UserId = userId,
                 ItemId = dto.ItemId,
                 Quantity = dto.Quantity
             };
@@ -79,7 +79,6 @@ namespace api.Services
             _context.CartItems.Remove(item);
             await _context.SaveChangesAsync();
         }
-
         public async Task UpdateAsync(int userId, int itemId, int newQuantity)
         {
             var user = await _context.Users.Include(u => u.CartItems).FirstOrDefaultAsync(u => u.Id == userId);

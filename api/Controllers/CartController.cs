@@ -1,18 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using api.DTOs.Cart;
 using api.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/cart-items")]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+        private int UserId
+        {
+            get => Convert.ToInt32(User.FindFirst("uid")?.Value ?? throw new UnauthorizedAccessException());
+        }
 
         public CartController(ICartService cartService)
         {
@@ -24,7 +32,7 @@ namespace api.Controllers
         {
             try
             {
-                var addResult = await _cartService.AddAsync(dto);
+                var addResult = await _cartService.AddAsync(UserId, dto);
                 if (addResult is null)
                 {
                     return BadRequest("UserId or ItemId is invalid.");
@@ -37,12 +45,12 @@ namespace api.Controllers
             }
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetAllByUserId(int userId)
+        [HttpGet]
+        public async Task<IActionResult> GetAllByUserId()
         {
             try
             {
-                return Ok(await _cartService.GetAllByUserIdAsync(userId));
+                return Ok(await _cartService.GetAllByUserIdAsync(UserId));
             }
             catch (Exception ex)
             {
@@ -50,12 +58,12 @@ namespace api.Controllers
             }
         }
 
-        [HttpDelete("{userId}/{itemId}")]
-        public async Task<IActionResult> RemoveItem(int userId, int itemId)
+        [HttpDelete("{itemId}")]
+        public async Task<IActionResult> RemoveItem(int itemId)
         {
             try
             {
-                await _cartService.DeleteAsync(userId, itemId);
+                await _cartService.DeleteAsync(UserId, itemId);
                 return Ok("Item removed from cart");
             }
             catch (Exception ex)
@@ -64,12 +72,12 @@ namespace api.Controllers
             }
         }
 
-        [HttpPatch("{userId}/{itemId}")]
-        public async Task<IActionResult> UpdateQuantity(int userId, int itemId, [FromBody] int newQuantity)
+        [HttpPatch("{itemId}")]
+        public async Task<IActionResult> UpdateQuantity(int itemId, [FromBody] int newQuantity)
         {
             try
             {
-                await _cartService.UpdateAsync(userId, itemId, newQuantity);
+                await _cartService.UpdateAsync(UserId, itemId, newQuantity);
                 return Ok("Item quantity updated.");
             }
             catch (Exception ex)
