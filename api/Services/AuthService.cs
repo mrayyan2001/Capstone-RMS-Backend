@@ -14,10 +14,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace api.Services
 {
-    public class ClientService : IClientService
+    public class AuthService : IAuthService
     {
         private readonly string _connString;
-        public ClientService(IConfiguration config)
+        public AuthService(IConfiguration config)
         {
             _connString = config.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("No Connection String");
         }
@@ -54,7 +54,6 @@ namespace api.Services
 
             }
         }
-
         public async Task<ClientDTO?> Login(ClientLoginDTO dto)
         {
             string selectCommandText =
@@ -92,7 +91,6 @@ namespace api.Services
             }
             return true;
         }
-
         public async Task<string?> RequestOtp(string email)
         {
 
@@ -121,8 +119,6 @@ namespace api.Services
                 return null;
             }
         }
-
-
         private async Task IncrementAttempt(int otpId)
         {
             using (SqlConnection conn = new SqlConnection(_connString))
@@ -136,7 +132,6 @@ namespace api.Services
                 }
             }
         }
-
         private async Task DeactivateOtp(int otpId)
         {
             using (SqlConnection conn = new SqlConnection(_connString))
@@ -149,23 +144,47 @@ namespace api.Services
                 }
             }
         }
+        private async Task<int> GetOtpId(string Email)
+        {
+            const string selectQuery = @"
+               SELECT TOP 1 o.Id
+               FROM OTPs o
+               INNER JOIN Users u ON o.UserId = u.Id
+               WHERE u.Email = @Email
+               ORDER BY o.CreatedAt DESC";
+
+            int otpId;
+
+            using (SqlConnection conn = new SqlConnection(_connString))
+            {
+                using (SqlCommand cmd = new SqlCommand(selectQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Email", Email);
+                    await conn.OpenAsync();
 
 
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (!await reader.ReadAsync())
+                            throw new Exception("OTP not found. Please request a new one.");
 
+                        otpId = reader.GetInt32(reader.GetOrdinal("Id"));
+                    }
 
+                    return otpId;
+                }
+            }
+        }
         public async Task<bool> VerifyOtp(VerifyOtpDTO dto)
         {
 
-            //const string selectQuery = @"
-            //    SELECT TOP 1 o.Id, o.OTPCode, o.IsActive, o.ExpiryDate, o.Attempt, o.CreatedAt 
-            //    FROM OTPs o
-            //    INNER JOIN Users u ON o.UserId = u.Id
-            //    WHERE u.Email = @Email
-            //    ORDER BY o.CreatedAt DESC";
-            const string selectQuery = @"SELECT TOP 1 o.Id, o.OTPCode, o.IsActive, o.ExpiryDate, o.Attempt, o.CreatedAt
-                                        FROM OTPs o 
-                                        WHERE o.UserId = @UserId
-                                        ORDER BY o.CreatedAt DESC";
+            const string selectQuery = @"
+               SELECT TOP 1 o.Id, o.OTPCode, o.IsActive, o.ExpiryDate, o.Attempt, o.CreatedAt 
+               FROM OTPs o
+               INNER JOIN Users u ON o.UserId = u.Id
+               WHERE u.Email = @Email
+               ORDER BY o.CreatedAt DESC";
+
             int otpId;
             string otpCode;
             bool isActive;
@@ -176,7 +195,7 @@ namespace api.Services
             {
                 using (SqlCommand cmd = new SqlCommand(selectQuery, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserId", dto.UserId);
+                    cmd.Parameters.AddWithValue("@Email", dto.Email);
                     await conn.OpenAsync();
 
 
@@ -206,29 +225,37 @@ namespace api.Services
                         throw new Exception("Incorrect OTP.");
                     }
 
-                    await DeactivateOtp(otpId);
                     return true;
                 }
             }
         }
         public async Task<bool> ResetPassword(ResetPasswordDTO dto)
         {
-            string query = "update users set PasswordHash=@pass where id=@id";
+            if (!await VerifyOtp(new VerifyOtpDTO()
+            {
+                Email = dto.Email,
+                Otp = dto.Otp
+            }))
+            {
+                throw new UnauthorizedAccessException("Otp is incorrect.");
+            }
+            string query = "update users set PasswordHash=@PasswordHash where Email=@Email";
 
             using (SqlConnection conn = new SqlConnection(_connString))
             {
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@id", dto.UserId);
-                    cmd.Parameters.AddWithValue("@pass", dto.ConfirmPassword);
+                    cmd.Parameters.AddWithValue("@Email", dto.Email);
+                    cmd.Parameters.AddWithValue("@PasswordHash", PasswordHelper.ComputeSHA512Hash(dto.ConfirmPassword));
                     conn.Open();
-                    cmd.ExecuteNonQuery();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
+
+            await DeactivateOtp(await GetOtpId(dto.Email));
             return true;
         }
-
         public async Task<ClientDTO?> Signup(ClientSignUpDTO dto)
         {
 
