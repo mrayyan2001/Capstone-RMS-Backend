@@ -306,6 +306,22 @@ namespace api.Services
 
         }
 
+        public Task<bool> IsLogin(int userId)
+        {
+            using (SqlConnection conn = new SqlConnection(_connString))
+            {
+               
+                conn.Open();
+                string query = "SELECT COUNT(*) FROM Users WHERE Id = @UserId AND IsLogging = 1";
+
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);   
+                    int result = (int)command.ExecuteScalar();
+                    return Task.FromResult(result > 0);
+                }
+            }
+        }
 
     }
 }
