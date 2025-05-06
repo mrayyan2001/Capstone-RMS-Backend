@@ -39,6 +39,9 @@ namespace api.Services
                 NumberOfReviews = item.OrderItems.Count(oi => oi.Review is not null),
             };
         }
+
+       
+
         public async Task<List<TopRatedItemDTO>> GetTop10RatedAsync()
         {
             return await _context.Items
@@ -78,6 +81,23 @@ namespace api.Services
                     ImageUrl = i.ImageUrl,
                 })
                 .ToListAsync();
+        }
+        public async Task<List<GetItemByCategoryIdDTO>> GetItemByCategoryId(int id)
+        {
+            
+            var item = await _context.Items.AsNoTracking().Include(i => i.OrderItems).FirstOrDefaultAsync(i => i.CategoryId == id);
+            if (item is null)
+                return null;
+            return new GetItemByCategoryIdDTO()
+            {
+                ItemId = item.Id,
+                NameAr = item.ItemNameAr,
+                NameEn = item.ItemNameEn,
+                DescriptionAr = item.ItemDescriptionAr,
+                DescriptionEn = item.ItemDescriptionEn,
+                Price = item.Price,
+              
+            }.ToListAsync();
         }
     }
 }
