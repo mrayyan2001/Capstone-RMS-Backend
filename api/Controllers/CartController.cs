@@ -9,22 +9,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace api.Controllers
 {
     [ApiController]
-    [Route("api/cart")]
+    [Route("api/cart-items")]
     public class CartController : ControllerBase
     {
-        private readonly ICartService _carService;
+        private readonly ICartService _cartService;
 
-        public CartController(ICartService carService)
+        public CartController(ICartService cartService)
         {
-            _carService = carService;
+            _cartService = cartService;
         }
 
-        [HttpPost("add")]
+        [HttpPost]
         public async Task<IActionResult> AddToCart([FromBody] AddCartDTO dto)
         {
             try
             {
-                var addResult = await _carService.AddAsync(dto);
+                var addResult = await _cartService.AddAsync(dto);
                 if (addResult is null)
                 {
                     return BadRequest("UserId or ItemId is invalid.");
@@ -37,12 +37,12 @@ namespace api.Controllers
             }
         }
 
-        [HttpGet("get-all/{userId}")]
+        [HttpGet("{userId}")]
         public async Task<IActionResult> GetAllByUserId(int userId)
         {
             try
             {
-                return Ok(await _carService.GetAllByUserIdAsync(userId));
+                return Ok(await _cartService.GetAllByUserIdAsync(userId));
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace api.Controllers
         {
             try
             {
-                await _carService.DeleteAsync(userId, itemId);
+                await _cartService.DeleteAsync(userId, itemId);
                 return Ok("Item removed from cart");
             }
             catch (Exception ex)
@@ -64,13 +64,13 @@ namespace api.Controllers
             }
         }
 
-        [HttpPatch("update-quantity")]
-        public async Task<IActionResult> UpdateQuantity(UpdateCartQuantityDTO dto)
+        [HttpPatch("{userId}/{itemId}")]
+        public async Task<IActionResult> UpdateQuantity(int userId, int itemId, [FromBody] int newQuantity)
         {
             try
             {
-                await _carService.UpdateAsync(dto);
-                return Ok("Item updated.");
+                await _cartService.UpdateAsync(userId, itemId, newQuantity);
+                return Ok("Item quantity updated.");
             }
             catch (Exception ex)
             {
