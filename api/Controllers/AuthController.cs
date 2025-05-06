@@ -1,3 +1,5 @@
+// Ignore Spelling: api
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +15,12 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ClientController : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly IClientService _clientService;
+        private readonly IAuthService _clientService;
         private readonly ITokenService _tokenService;
 
-        public ClientController(IClientService clientService, ITokenService tokenService)
+        public AuthController(IAuthService clientService, ITokenService tokenService)
         {
             _clientService = clientService;
             _tokenService = tokenService;

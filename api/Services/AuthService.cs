@@ -14,10 +14,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace api.Services
 {
-    public class ClientService : IClientService
+    public class AuthService : IAuthService
     {
         private readonly string _connString;
-        public ClientService(IConfiguration config)
+        public AuthService(IConfiguration config)
         {
             _connString = config.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("No Connection String");
         }
@@ -279,6 +279,22 @@ namespace api.Services
 
         }
 
+        public Task<bool> IsLogin(int userId)
+        {
+            using (SqlConnection conn = new SqlConnection(_connString))
+            {
+               
+                conn.Open();
+                string query = "SELECT COUNT(*) FROM Users WHERE Id = @UserId AND IsLogging = 1";
+
+                using (SqlCommand command = new SqlCommand(query, conn))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);   
+                    int result = (int)command.ExecuteScalar();
+                    return Task.FromResult(result > 0);
+                }
+            }
+        }
 
     }
 }

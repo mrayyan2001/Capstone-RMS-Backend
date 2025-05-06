@@ -1,6 +1,9 @@
 using System.Text;
+using api.Data.Implementation;
+using api.Data.interfaces;
 using api.Helpers;
 using api.Interfaces;
+using api.Mapping;
 using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,14 +14,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
-builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserServices>();
+//builder.Services.AddScoped<IFavRepo,FavRepo>();
+builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
+
+builder.Services.AddScoped<IfavServices, FavService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 
 builder.Services.AddDbContext<FoodtekDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 builder.Services.AddAuthentication(options =>
 {

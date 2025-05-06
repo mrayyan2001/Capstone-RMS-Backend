@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Interfaces
 {
-    public interface IClientService
+    public interface IAuthService
     {
         public Task<ClientDTO?> Signup(ClientSignUpDTO dto);
         public Task<ClientDTO?> Login(ClientLoginDTO dto);
+        public Task<bool> IsLogin(int userId);
         public Task<string?> RequestOtp(string email);
         public Task<bool> VerifyOtp(VerifyOtpDTO dto);
         public Task<bool> ResetPassword(ResetPasswordDTO dto);
