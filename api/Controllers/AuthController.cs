@@ -13,13 +13,13 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ClientController : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly IClientService _clientService;
+        private readonly IAuthService _clientService;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
 
-        public ClientController(IClientService clientService, ITokenService tokenService, IEmailService emailService)
+        public AuthController(IAuthService clientService, ITokenService tokenService, IEmailService emailService)
         {
             _clientService = clientService;
             _tokenService = tokenService;

@@ -14,10 +14,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace api.Services
 {
-    public class ClientService : IClientService
+    public class AuthService : IAuthService
     {
         private readonly string _connString;
-        public ClientService(IConfiguration config)
+        public AuthService(IConfiguration config)
         {
             _connString = config.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("No Connection String");
         }

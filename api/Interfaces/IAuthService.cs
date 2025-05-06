@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Interfaces
 {
-    public interface IClientService
+    public interface IAuthService
     {
         public Task<ClientDTO?> Signup(ClientSignUpDTO dto);
         public Task<ClientDTO?> Login(ClientLoginDTO dto);
