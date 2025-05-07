@@ -1,11 +1,12 @@
 ﻿using api.Data.interfaces;
 using api.DTOs.Offers;
+using api.Interfaces;
 using api.Models;
 using AutoMapper;
 
 namespace api.Services
 {
-    public class OfferService
+    public class OfferService:IOfferServce
     {
 
         private readonly IBaseRepo<Offer> _repo;
@@ -16,10 +17,10 @@ namespace api.Services
             _repo = repo;
             _mapper = mapper;
         }
-        public async Task<OffersDTOs> GetActiveOffers()
+        public async Task<IEnumerable<OffersDTOs>> GetActiveOffers()
         {
-           var result= await _repo.FindAllAsync(x=>x.IsActive==true);
-            return _mapper.Map<OffersDTOs>(result);
+            IEnumerable<Offer> result = await _repo.FindAllAsync(x=>x.IsActive==true);
+            return _mapper.Map<IEnumerable<OffersDTOs>>(result);
 
         }
 

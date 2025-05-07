@@ -17,9 +17,7 @@ namespace api.Mapping
             .ForMember(dest => dest.ItemId, opt => opt.MapFrom(src => src.ItemId));
 
             CreateMap<AddItemToFavDTO, Bookmark>();
-            CreateMap<IEnumerable<Offer>, OffersDTOs>();
-
-
+            CreateMap<Offer, OffersDTOs>();
         }
     }
 }

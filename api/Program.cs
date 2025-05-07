@@ -51,6 +51,8 @@ builder.Services.AddScoped<IUserService, UserServices>();
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
 builder.Services.AddScoped<IfavServices, FavService>();
+builder.Services.AddScoped<IOfferServce, OfferService>();
+
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
