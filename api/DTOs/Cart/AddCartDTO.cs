@@ -8,7 +8,6 @@ namespace api.DTOs.Cart
 {
     public class AddCartDTO
     {
-        public int UserId { get; set; }
         public int ItemId { get; set; }
         [Range(0, 99)]
         public int Quantity { get; set; }
