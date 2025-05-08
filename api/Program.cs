@@ -50,6 +50,10 @@ builder.Services.AddScoped<IUserService, UserServices>();
 //builder.Services.AddScoped<IFavRepo,FavRepo>();
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
+builder.Services.AddScoped<IAddress, AddressService>();
+builder.Services.AddScoped<INotification, NotificationService>();
+builder.Services.AddScoped<ICategory, CategoryService>();
+
 builder.Services.AddScoped<IfavServices, FavService>();
 builder.Services.AddScoped<IOfferServce, OfferService>();
 
