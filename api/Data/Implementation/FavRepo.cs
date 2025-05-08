@@ -12,18 +12,25 @@ namespace api.Data.Implementation
     //    public FavRepo(FoodtekDbContext context):base(context) 
     //    {
 
-    //    }
-
-    //    public async Task<List<Bookmark>> GetFavoriteItemsByUserIdAsync(int userId)
-    //    {
-    //        var details = await _context.Bookmarks
-    //            .Where(x => x.ClientId == userId)
-    //            .Include(b => b.Item)
-    //            .ToListAsync();
-
-    //        return details;
-    //    }
-
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+    };
+});
 
 
     //}
